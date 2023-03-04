@@ -15,7 +15,7 @@ class EmailSender:
         self.sender_password = os.getenv('sender_password')
         # Set up the SMTP server
         self.smtp_connection = smtplib.SMTP(self.smtp_server, self.smtp_port)
-        self.smtp_connection.connect()
+
         self.smtp_connection.ehlo()
         self.smtp_connection.starttls()
         self.smtp_connection.login(self.sender_email, self.sender_password)
@@ -49,7 +49,7 @@ class EmailSender:
             listing['mail_text'] = formatted_message
             listing['mail_subject'] = f"""Request for Inspection {listing['address_str']}"""
 
-    def preparing_all_emails(self,essential_info_dicts):
+    def send_all_emails(self,essential_info_dicts):
         for listing in essential_info_dicts:
             # Set up the message parameters
             msg = MIMEMultipart()
@@ -57,10 +57,9 @@ class EmailSender:
             msg['To'] = ', '.join(listing['agent_mail'])
             msg['Subject'] = listing['mail_subject']
             msg.attach(MIMEText(listing['mail_text'], 'plain'))
+            # Send the message
+            self.smtp_connection.sendmail(self.sender_email, listing['agent_mail'], msg.as_string())
         
-    # def send_all_emails(self):
-    #     # Send the message
-    #     self.smtp_connection.sendmail(self.sender_email, recipient_emails, msg.as_string())
+            listing['Email_Object'] = msg
         
-    #     # Close the SMTP connection
-    #     self.smtp_connection.quit()
+        self.smtp_connection.quit()
