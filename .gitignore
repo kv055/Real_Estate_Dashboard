@@ -141,3 +141,6 @@ cython_debug/
 # VS Code Auto generated Folders/Files
 .idea
 .vscode
+
+# Folder for Mail Text and Attachment (local only)
+/Mail_Templates_and_Attachments

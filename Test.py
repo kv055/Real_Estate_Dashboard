@@ -72,7 +72,10 @@ for listing in filtered_listings:
         'rent_per_room': listing.get('price', 0)/listing.get('features',{}).get('general',{}).get('bedrooms',0),
         'agency': listing.get('agency', {}).get('name', 0),
         'agent_name': listing.get('lister', {}).get('name', 0),
-        'agent_mail': listing.get('lister', {}).get('email', 0),
+        
+        # 'agent_mail': listing.get('lister', {}).get('email', 0),
+        'agent_mail': 'kilivoss@gmail.com',
+
         'url': listing.get('_links', {}).get('prettyUrl', {}).get('href', 0),
         'listing_id': listing['listingId']
     })
@@ -84,8 +87,7 @@ for listing in filtered_listings:
 from Bulk_Mail_Sender import EmailSender
 Bulk_Email_Instance = EmailSender()
 Bulk_Email_Instance.generating_all_emails(essential_info_dicts)
-Bulk_Email_Instance.preparing_all_emails(essential_info_dicts)
-# Bulk_Email_Instance.send_all_emails()
+Bulk_Email_Instance.send_all_emails(essential_info_dicts)
 
 L=0
 

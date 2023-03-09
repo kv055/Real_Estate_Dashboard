@@ -1,6 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
 import os
 from dotenv import load_dotenv
 
@@ -21,21 +22,22 @@ class EmailSender:
         self.smtp_connection.login(self.sender_email, self.sender_password)
     
     def generating_all_emails(self,list_of_listings):
-        message = '''Dear {agent_name} of {agency},
-        I hope this email finds you well. I am writing to express my strong interest in the
-        {bed_rooms} bedroom {type} listing for {address_str}, which I came across on realestate.com.au.
-        After reviewing the property details and photos, I believe that this property could be an excellent fit for my needs.
-        In light of this, I would like to formally ask if the listing is still available,
-        and if so request an inspection of the property.
-        I would like to arrange a time and date that is convenient for both of us,
-        so that I can view the property in person and get a better sense of its potential.
-        I am very serious about my interest and would like to move forward with an inspection as soon as possible.
-        My phonenumber is 0421 394037 and i am happy to share any additional documents metioned in my CV as well.
-        Thank you for your time and consideration, and I look forward to hearing from you soon.
+        message = """
+            <html>
+            <body>
+                <p>Dear {agent_name} of {agency},</p>
+                <p>I hope this email finds you well. I am writing to express my strong interest in the {bed_rooms} bedroom {type} listing for {address_str}, which I came across on realestate.com.au.</p>
+                <p>After reviewing the property details and photos, I believe that this property could be an excellent fit for my needs. In light of this, I would like to formally ask if the listing is still available, and if so request an inspection of the property.</p>
+                <p>I would like to arrange a time and date that is convenient for both of us, so that I can view the property in person and get a better sense of its potential. I am very serious about my interest and would like to move forward with an inspection as soon as possible.</p>
+                <p>My phone number is 0421 394037 and I am happy to share any additional documents mentioned in my CV as well.</p>
+                <p>Thank you for your time and consideration, and I look forward to hearing from you soon.</p>
+                <br>
+                <p>Best regards,</p>
+                <p>Kilian Voss</p>
+            </body>
+            </html>
+        """
 
-        Best regards,
-
-        Kilian Voss'''
         for listing in list_of_listings:
             formatted_message = message.format(
                 agent_name=listing['agent_name'], 
@@ -54,12 +56,18 @@ class EmailSender:
             # Set up the message parameters
             msg = MIMEMultipart()
             msg['From'] = self.sender_email
-            msg['To'] = ', '.join(listing['agent_mail'])
+            msg['To'] = listing['agent_mail']
             msg['Subject'] = listing['mail_subject']
-            msg.attach(MIMEText(listing['mail_text'], 'plain'))
+            msg.attach(MIMEText(listing['mail_text'], 'html'))
+
+            # Attach the file to the email
+            with open('Mail_Templates_and_Attachments/Balance Confirmation.pdf', 'rb') as f:
+                attachment = MIMEApplication(f.read(), _subtype=os.path.splitext('Mail_Templates_and_Attachments/Balance Confirmation.pdf')[1][1:])
+                attachment.add_header('Content-Disposition', 'attachment', filename=os.path.basename('Mail_Templates_and_Attachments/Balance Confirmation.pdf'))
+                msg.attach(attachment)
+
             # Send the message
             self.smtp_connection.sendmail(self.sender_email, listing['agent_mail'], msg.as_string())
         
-            listing['Email_Object'] = msg
-        
         self.smtp_connection.quit()
+        
