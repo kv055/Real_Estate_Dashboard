@@ -1,52 +1,21 @@
-import re
-from realestate_data import Search, Locality, PriceRange, Filters, paged_results
-p = PriceRange()
-listings_for_all_postcodes = []
-list_of_postcodes = ['3000', '3001', '3002', '3003', '3004', '3005', '3006', '3008', '3010', '3011', '3012', '3013', '3015', '3016', '3018', '3019', '3020', '3021', '3022', '3023', '3024', '3025', '3026', '3027', '3028', '3029', '3030', '3031', '3032', '3033', '3034', '3036', '3037', '3038', '3039', '3040', '3041', '3042', '3043', '3044', '3045', '3046', '3047', '3048', '3049', '3050']
 
-for code in list_of_postcodes: 
-    pass
+from Results_RealeasteteComAu import RealEstateComAu
+# from Results_FB_Marketplace import 
+# from Results_FB_Groups import 
 
-l = Locality()
-l.locality = 'Melbourne'
-l.subdivision = Locality.SUBDIVISION_VIC
-l.postcode = '3000'
+from Bulk_Mail_Sender import EmailSender
 
-f = Filters()
-f.surrounding_suburbs = True
 
-s = Search()
-s.channel = Search.CHANNEL_RENT
-s.localities = [l]
-s.filters = f
-
-paged_data = [page['tieredResults'] for page in paged_results(s)]
-all_data = []
-
-for page in paged_data:
-    if page[0]['count'] > 0:
-        for listing in page[0]['results']:
-            if any(char.isdigit() for char in listing['price']['display']):
-                extract_number = int(re.findall('[\d,]+', listing['price']['display'].replace(',', ''))[0])
-                listing['price'] = extract_number
-                all_data.append(listing)
-    elif len(page) > 1 and page[1]['count'] > 0:
-        for listing in page[1]['results']:
-            if any(char.isdigit() for char in listing['price']['display']):
-                extract_number = int(re.findall('[\d,]+', listing['price']['display'].replace(',', ''))[0])
-                listing['price'] = extract_number
-                all_data.append(listing)
-    else:
-        pass
-
+Melbounre_RealestateComAu = RealEstateComAu()
+all_data = Melbounre_RealestateComAu.fetch_data('Melbourne','3000')
 
 
 def filter_bedrooms_and_price(listing):    
-    if listing['price'] <= 900 and listing['features']['general']['bedrooms'] >= 3:
-        return True
-    elif listing['price'] <= 600 and listing['features']['general']['bedrooms'] >= 2:
-        return True
-    elif listing['price'] <= 300 and listing['features']['general']['bedrooms'] >= 1:
+    # if listing['price'] <= 900 and listing['features']['general']['bedrooms'] >= 3:
+    #     return True
+    # elif listing['price'] <= 600 and listing['features']['general']['bedrooms'] >= 2:
+    #     return True
+    if listing['price'] <= 300 and listing['features']['general']['bedrooms'] >= 1:
         return True
     else:
         return False
@@ -73,8 +42,8 @@ for listing in filtered_listings:
         'agency': listing.get('agency', {}).get('name', 0),
         'agent_name': listing.get('lister', {}).get('name', 0),
         
-        # 'agent_mail': listing.get('lister', {}).get('email', 0),
-        'agent_mail': 'kilivoss@gmail.com',
+        'agent_mail': listing.get('lister', {}).get('email', 0),
+        # 'agent_mail': 'kilivoss@gmail.com',
 
         'url': listing.get('_links', {}).get('prettyUrl', {}).get('href', 0),
         'listing_id': listing['listingId']
@@ -84,7 +53,7 @@ for listing in filtered_listings:
 # Save all of the above listings in a database
 
 # Generate Emails for each listing
-from Bulk_Mail_Sender import EmailSender
+
 Bulk_Email_Instance = EmailSender()
 Bulk_Email_Instance.generating_all_emails(essential_info_dicts)
 Bulk_Email_Instance.send_all_emails(essential_info_dicts)
