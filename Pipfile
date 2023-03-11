@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 realestate-data = "*"
 python-dotenv = "*"
+pandas = "*"
+bs4 = "*"
 
 [dev-packages]
 
