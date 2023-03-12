@@ -4,7 +4,7 @@ from Results_RealeasteteComAu import RealEstateComAu
 # from Results_FB_Groups import 
 
 from Bulk_Mail_Sender import EmailSender
-
+from DB_Class import RealEstateDB
 
 Melbounre_RealestateComAu = RealEstateComAu()
 all_data = Melbounre_RealestateComAu.fetch_data('Melbourne','3000')
@@ -41,22 +41,22 @@ for listing in filtered_listings:
         'rent_per_room': listing.get('price', 0)/listing.get('features',{}).get('general',{}).get('bedrooms',0),
         'agency': listing.get('agency', {}).get('name', 0),
         'agent_name': listing.get('lister', {}).get('name', 0),
-        
         'agent_mail': listing.get('lister', {}).get('email', 0),
         # 'agent_mail': 'kilivoss@gmail.com',
-
         'url': listing.get('_links', {}).get('prettyUrl', {}).get('href', 0),
         'listing_id': listing['listingId']
     })
 
-
-# Save all of the above listings in a database
-
-# Generate Emails for each listing
-
 Bulk_Email_Instance = EmailSender()
+# Generate Emails for each listing
 Bulk_Email_Instance.generating_all_emails(essential_info_dicts)
-Bulk_Email_Instance.send_all_emails(essential_info_dicts)
+# Save all of the above listings in a database#
+# Create a new instance of the RealEstateDB class
+db = RealEstateDB()
+for listing in essential_info_dicts:
+    db.insert_listing(listing)
+
+# Bulk_Email_Instance.send_all_emails(essential_info_dicts)
 
 L=0
 
