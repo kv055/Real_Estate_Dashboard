@@ -144,3 +144,7 @@ cython_debug/
 
 # Folder for Mail Text and Attachment (local only)
 /Mail_Templates_and_Attachments
+
+# DB files
+.db
+filteredlistings.db
